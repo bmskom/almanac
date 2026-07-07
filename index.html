@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMS-KOM ALMANAC</title>
+    
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    
+    <style>
+        /* Mobile-first, stacked layout */
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px auto; 
+            padding: 10px;
+            display: flex; 
+            flex-direction: column; 
+            gap: 30px; 
+            align-items: center; 
+            max-width: 1000px; 
+            background-color: #f4f7f8; 
+        }
+        
+        /* Section Containers */
+        .header-container, .form-container, .calendar-container, .upcoming-container { 
+            width: 100%; 
+            background: #ffffff; 
+            border-radius: 8px; 
+            border: 1px solid #ddd; 
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Title Header */
+        .header-container {
+            background: #ffffff;
+            color: #333333;
+            text-align: center;
+        }
+        .header-container h1 { margin: 0; font-size: 1.8em; }
+        .header-container p { margin: 5px 0 0 0; opacity: 0.8; }
+        
+        /* Header Image Styling */
+        .header-banner {
+            width: 100%; 
+            max-height: 315px; 
+            object-fit: cover; 
+            border-radius: 4px; 
+            margin-bottom: 15px; 
+        }
+        
+        /* Form Styling */
+        .form-container h3 { margin-top: 0; border-bottom: 2px solid #0366d6; padding-bottom: 10px; display: inline-block;}
+        input, select, button { width: 100%; margin-bottom: 15px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #0366d6; color: white; border: none; cursor: pointer; font-weight: bold; font-size: 1.1em; }
+        button:hover { background: #0056b3; }
+        
+        /* Specific styling for the conditional location input */
+        #locationOther { margin-top: -5px; } /* Pulls it slightly closer to the dropdown */
+
+        /* Calendar Container & Buttons */
+        .calendar-container { overflow-x: auto; }
+        .fc .fc-button {
+            font-size: 0.85em !important; 
+            padding: 4px 8px !important;  
+        }
+
+        /* Upcoming Events Section */
+        .upcoming-container h3 { margin-top: 0; border-bottom: 2px solid #0366d6; padding-bottom: 10px; display: inline-block; }
+        .event-list { list-style-type: none; padding: 0; margin: 0; display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        .event-card { padding: 15px; background: #f9f9f9; border-left: 5px solid #0366d6; border-radius: 4px; border: 1px solid #eaeaea; }
+        .event-card strong { font-size: 1.1em; display: block; margin-bottom: 5px; color: #333; }
+        .event-details { font-size: 0.9em; color: #555; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <img src="header2.jpg" alt="Department Banner" class="header-banner">
+        
+        <h1>BMS KOM ALMANAC</h1>
+        <p>Schedule and track BMS upcoming events + Booking of Meeting Rooms</p>
+    </div>
+
+    <div class="form-container">
+        <h3>Add New Activity</h3>
+        <form id="activityForm">
+            <label>Activity Name</label>
+            <input type="text" id="name" required>
+            
+            <label>Start Date and Time</label>
+            <input type="datetime-local" id="startDatetime" required>
+
+            <label>End Date and Time</label>
+            <input type="datetime-local" id="endDatetime" required>
+            
+            <label>Location</label>
+            <select id="locationSelect" required>
+                <option value="" disabled selected>Select a location</option>
+                
+                <optgroup label="Meeting Rooms">
+                    <option value="BMS Meeting Room (Level 2)">BMS Meeting Room (Level 2)</option>
+                    <option value="BMS Office Open Space (Level 2)">BMS Office Open Space (Level 2)</option>
+                    <option value="BMS Lab Office (Level 3)">BMS Lab Office (Level 3)</option>
+                </optgroup>
+
+                <optgroup label="Anatomage">
+                    <option value="Anatomage 1 @ Dissection Hall">Anatomage 1 @ Dissection Hall</option>
+                    <option value="Anatomage 2 @ Medical Museum">Anatomage 2 @ Medical Museum</option>
+                </optgroup>
+
+                <optgroup label="Smartboard Rooms">
+                    <option value="Smartboard 1 @ EM Projection Room (Level 1)">Smartboard 1 @ EM Projection Room (Level 1)</option>
+                    <option value="Smartboard 2 @ BMS Office (Level 2)">Smartboard 2 @ BMS Office (Level 2)</option>
+                    <option value="Smartboard 3 @ Multipurpose Room (Level 2)">Smartboard 3 @ Multipurpose Room (Level 2)</option>
+                    <option value="Smartboard 4 @ BMS Lab Office (Level 3)">Smartboard 4 @ BMS Lab Office (Level 3)</option>
+                    <option value="Smartboard 5 @ BMOLEP Common Room (Level 3)">Smartboard 5 @ BMOLEP Common Room (Level 3)</option>
+                </optgroup>
+                
+                <option value="Others">Others (Please specify)</option>
+            </select>
+            <input type="text" id="locationOther" placeholder="Enter custom location" style="display: none;">
+            
+            <label>Team</label>
+            <select id="team" required>
+                <option value="" disabled selected>Select a team</option>
+                <option value="HOD Support Secretariat">HOD Support Secretariat</option>
+                <option value="ACADEMIA-UG">ACADEMIA-UG</option>
+                <option value="ACADEMIA-PG">ACADEMIA-PG</option>
+                <option value="CURRIQ">CURRIQ</option>
+                <option value="LABRIZ">LABRIZ</option>
+                <option value="IHSAN">IHSAN</option>
+                <option value="PRESTIJ">PRESTIJ</option>
+                <option value="AMAL TAUTAN">AMAL TAUTAN</option>
+                <option value="SYTI">SYTI</option>
+                <option value="FADILAT">FADILAT</option>
+                <option value="OTHER">OTHER</option>
+            </select>
+            
+            <button type="submit" id="submitBtn">Save Activity</button>
+        </form>
+        <p id="statusMsg"></p>
+    </div>
+
+    <div class="calendar-container">
+        <div id="calendar"></div>
+    </div>
+
+    <div class="upcoming-container">
+        <h3>Upcoming Activities</h3>
+        <ul id="eventList" class="event-list">
+            <li>Loading upcoming events...</li>
+        </ul>
+    </div>
+
+    <script>
+        // REPLACE THIS WITH YOUR DEPLOYED GOOGLE SCRIPT URL
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwkVAmw_w3_DBeCG2Nmnonvei81nMvV1wwC7pNDy59jpDivDll_nkxtax1yamWcSyOP/exec'; 
+
+        // Handle showing/hiding the "Other" location text field
+        const locationSelect = document.getElementById('locationSelect');
+        const locationOther = document.getElementById('locationOther');
+
+        locationSelect.addEventListener('change', function() {
+            if (this.value === 'Others') {
+                locationOther.style.display = 'block';
+                locationOther.required = true;
+            } else {
+                locationOther.style.display = 'none';
+                locationOther.required = false;
+                locationOther.value = ''; // Clear out the field if they change their mind
+            }
+        });
+
+        // Function to render the list at the bottom
+        function renderUpcomingEvents(eventsData) {
+            const listEl = document.getElementById('eventList');
+            listEl.innerHTML = ''; 
+
+            const now = new Date();
+            
+            const upcoming = eventsData
+                .filter(event => new Date(event.start) >= now)
+                .sort((a, b) => new Date(a.start) - new Date(b.start));
+
+            if (upcoming.length === 0) {
+                listEl.innerHTML = '<li>No upcoming events scheduled at this time.</li>';
+                return;
+            }
+
+            upcoming.forEach(event => {
+                const li = document.createElement('li');
+                li.className = 'event-card';
+                
+                const startDateObj = new Date(event.start);
+                const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                const formattedDate = startDateObj.toLocaleDateString(undefined, dateOptions);
+
+                li.innerHTML = `
+                    <strong>${event.title}</strong>
+                    <div class="event-details">
+                        🕒 ${formattedDate}<br>
+                        📍 ${event.extendedProps.location}<br>
+                        👥 ${event.extendedProps.team}
+                    </div>
+                `;
+                listEl.appendChild(li);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            
+            // Initialize Calendar
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                displayEventTime: false, 
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                },
+                
+                events: function(info, successCallback, failureCallback) {
+                    fetch(API_URL + '?t=' + new Date().getTime())
+                        .then(response => response.json())
+                        .then(data => {
+                            successCallback(data);
+                            renderUpcomingEvents(data);
+                        })
+                        .catch(error => {
+                            console.error('Calendar Fetch Error:', error);
+                            failureCallback(error);
+                            document.getElementById('eventList').innerHTML = '<li style="color:red;">Error loading events.</li>';
+                        });
+                },
+                
+                eventClick: function(info) {
+                    alert('Location: ' + info.event.extendedProps.location + '\nTeam: ' + info.event.extendedProps.team);
+                }
+            });
+            calendar.render();
+
+            // Handle Form Submission
+            document.getElementById('activityForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const btn = document.getElementById('submitBtn');
+                const statusMsg = document.getElementById('statusMsg');
+                
+                btn.innerText = 'Saving...';
+                btn.disabled = true;
+
+                // Determine final location value
+                const finalLocation = locationSelect.value === 'Others' ? locationOther.value : locationSelect.value;
+
+                const payload = {
+                    name: document.getElementById('name').value,
+                    startDatetime: document.getElementById('startDatetime').value,
+                    endDatetime: document.getElementById('endDatetime').value,
+                    location: finalLocation,
+                    team: document.getElementById('team').value,
+			type: 'internal'
+                };
+
+               fetch(API_URL + '?view=internal&t=' + new Date().getTime())
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    mode: 'no-cors', 
+                    headers: { 'Content-Type': 'application/json' }
+                }).then(() => {
+                    statusMsg.innerText = "Activity Saved!";
+                    statusMsg.style.color = "green";
+                    
+                    document.getElementById('activityForm').reset();
+                    locationOther.style.display = 'none'; // Re-hide the custom location input
+                    
+                    btn.innerText = 'Save Activity';
+                    btn.disabled = false;
+                    
+                    calendar.refetchEvents(); 
+                    
+                    setTimeout(() => statusMsg.innerText = "", 3000);
+                }).catch(error => {
+                    console.error('Error:', error);
+                    statusMsg.innerText = "Error saving activity.";
+                    statusMsg.style.color = "red";
+                    btn.innerText = 'Save Activity';
+                    btn.disabled = false;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
