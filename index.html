@@ -155,7 +155,6 @@
     </div>
 
     <script>
-        // REPLACE THIS WITH YOUR DEPLOYED GOOGLE SCRIPT URL
         const API_URL = 'https://script.google.com/macros/s/AKfycbwkVAmw_w3_DBeCG2Nmnonvei81nMvV1wwC7pNDy59jpDivDll_nkxtax1yamWcSyOP/exec'; 
 
         // Handle showing/hiding the "Other" location text field
@@ -169,7 +168,7 @@
             } else {
                 locationOther.style.display = 'none';
                 locationOther.required = false;
-                locationOther.value = ''; // Clear out the field if they change their mind
+                locationOther.value = ''; 
             }
         });
 
@@ -223,7 +222,8 @@
                 },
                 
                 events: function(info, successCallback, failureCallback) {
-                    fetch(API_URL + '?t=' + new Date().getTime())
+                    // FIX: Placed ?view=internal here in the GET request where it belongs
+                    fetch(API_URL + '?view=internal&t=' + new Date().getTime())
                         .then(response => response.json())
                         .then(data => {
                             successCallback(data);
@@ -260,10 +260,11 @@
                     endDatetime: document.getElementById('endDatetime').value,
                     location: finalLocation,
                     team: document.getElementById('team').value,
-			type: 'internal'
+                    type: 'internal'
                 };
 
-               fetch(API_URL + '?view=internal&t=' + new Date().getTime())
+                // FIX: Restored the opening bracket '{' and removed the query parameters from the POST request
+                fetch(API_URL, {
                     method: 'POST',
                     body: JSON.stringify(payload),
                     mode: 'no-cors', 
@@ -273,7 +274,7 @@
                     statusMsg.style.color = "green";
                     
                     document.getElementById('activityForm').reset();
-                    locationOther.style.display = 'none'; // Re-hide the custom location input
+                    locationOther.style.display = 'none'; 
                     
                     btn.innerText = 'Save Activity';
                     btn.disabled = false;
