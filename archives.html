@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMS-KOM ALMANAC - All Bookings Archive</title>
+    
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px auto; 
+            padding: 10px;
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            align-items: center; 
+            max-width: 1000px; 
+            background-color: #f4f7f8; 
+        }
+        
+        .header-container, .month-section { 
+            width: 100%; 
+            background: #ffffff; 
+            border-radius: 8px; 
+            border: 1px solid #ddd; 
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .header-container { text-align: center; }
+        .header-container h1 { margin: 0; font-size: 1.8em; color: #333; }
+        .nav-link { display: inline-block; margin-top: 10px; color: #0366d6; text-decoration: none; font-weight: bold; }
+        .nav-link:hover { text-decoration: underline; }
+
+        .month-header { 
+            border-bottom: 2px solid #0366d6; 
+            padding-bottom: 8px; 
+            margin-top: 0; 
+            color: #0366d6;
+            font-size: 1.3em;
+        }
+
+        .event-grid { 
+            list-style-type: none; 
+            padding: 0; 
+            margin: 15px 0 0 0; 
+            display: grid; 
+            gap: 15px; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+        }
+
+        .event-card { 
+            padding: 15px; 
+            background: #f9f9f9; 
+            border-left: 5px solid #0366d6; 
+            border-radius: 4px; 
+            border: 1px solid #eaeaea; 
+        }
+
+        .event-card strong { font-size: 1.1em; display: block; margin-bottom: 5px; color: #333; }
+        .event-details { font-size: 0.9em; color: #555; line-height: 1.5; }
+        .loading, .error-msg { text-align: center; font-size: 1.1em; color: #666; width: 100%; }
+        .error-msg { color: red; }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h1>BMS KOM ALMANAC - Master Schedule</h1>
+        <p>Complete booking archive organized by month</p>
+        <a href="index.html" class="nav-link">← Back to Calendar & Booking Form</a>
+    </div>
+
+    <div id="archiveContainer" style="width: 100%;">
+        <p class="loading">Loading booking history...</p>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwkVAmw_w3_DBeCG2Nmnonvei81nMvV1wwC7pNDy59jpDivDll_nkxtax1yamWcSyOP/exec'; 
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch(API_URL + '?view=internal&t=' + new Date().getTime())
+                .then(response => response.json())
+                .then(eventsData => {
+                    renderArchive(eventsData);
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    document.getElementById('archiveContainer').innerHTML = '<p class="error-msg">Error loading booking archive.</p>';
+                });
+        });
+
+        function renderArchive(eventsData) {
+            const container = document.getElementById('archiveContainer');
+            container.innerHTML = '';
+
+            if (!eventsData || eventsData.length === 0) {
+                container.innerHTML = '<p class="loading">No bookings found in the almanac.</p>';
+                return;
+            }
+
+            // Sort all events chronologically (earliest first)
+            const sortedEvents = eventsData.sort((a, b) => new Date(a.start) - new Date(b.start));
+
+            // Group events by "Month Year" (e.g., "October 2026")
+            const grouped = {};
+            sortedEvents.forEach(event => {
+                const date = new Date(event.start);
+                const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                
+                if (!grouped[monthYear]) {
+                    grouped[monthYear] = [];
+                }
+                grouped[monthYear].push(event);
+            });
+
+            // Render each month section
+            Object.keys(grouped).forEach(monthYear => {
+                const section = document.createElement('div');
+                section.className = 'month-section';
+
+                const title = document.createElement('h3');
+                title.className = 'month-header';
+                title.innerText = monthYear;
+                section.appendChild(title);
+
+                const ul = document.createElement('ul');
+                ul.className = 'event-grid';
+
+                grouped[monthYear].forEach(event => {
+                    const li = document.createElement('li');
+                    li.className = 'event-card';
+
+                    const startDateObj = new Date(event.start);
+                    const endDateObj = new Date(event.end || event.start);
+                    
+                    const timeFormat = { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' };
+                    const formattedStart = startDateObj.toLocaleDateString(undefined, timeFormat);
+                    
+                    const location = (event.extendedProps && event.extendedProps.location) ? event.extendedProps.location : 'N/A';
+                    const team = (event.extendedProps && event.extendedProps.team) ? event.extendedProps.team : 'N/A';
+
+                    li.innerHTML = `
+                        <strong>${event.title}</strong>
+                        <div class="event-details">
+                            🕒 ${formattedStart}<br>
+                            📍 ${location}<br>
+                            👥 ${team}
+                        </div>
+                    `;
+                    ul.appendChild(li);
+                });
+
+                section.appendChild(ul);
+                container.appendChild(section);
+            });
+        }
+    </script>
+</body>
+</html>
